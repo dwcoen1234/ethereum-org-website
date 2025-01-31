@@ -1,26 +1,27 @@
+import React from "react"
+import { motion } from "framer-motion"
 import {
   Grid,
   type GridProps,
   type ListProps,
   OrderedList,
 } from "@chakra-ui/react"
-import React from "react"
-import { WordDisplay, type WordStyleVariant } from "./WordDisplay"
+
 import {
   DELAY_MULTIPLIER_MS,
   EXTRA_DELAY_MS,
   WORDS_REQUIRED,
 } from "./constants"
-import { motion } from "framer-motion"
+import { WordDisplay, type WordStyleVariant } from "./WordDisplay"
 
-interface WordListProps {
+type WordListProps = {
   words: Array<string>
   wordsSelected?: number
 }
 
 // ?: Consider not generating
 // ?: Keep in mind translations... English only? BIP39 Langs only?
-export const WordList: React.FC<WordListProps> = ({ words, wordsSelected }) => {
+export const WordList = ({ words, wordsSelected }: WordListProps) => {
   const sharedStyles = {
     display: "flex",
     flexDirection: "column",
@@ -44,12 +45,12 @@ export const WordList: React.FC<WordListProps> = ({ words, wordsSelected }) => {
     const variant: WordStyleVariant = initialWordDisplay
       ? "initial"
       : index === wordsSelected
-      ? "active"
-      : index < wordsSelected
-      ? "complete"
-      : index < 2
-      ? "incomplete"
-      : "disabled"
+        ? "active"
+        : index < wordsSelected
+          ? "complete"
+          : index < 2
+            ? "incomplete"
+            : "disabled"
     const showLabel = initialWordDisplay || variant === "complete"
 
     const getDelayFromIndex = (index: number, isInitial?: boolean): number => {

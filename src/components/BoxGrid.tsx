@@ -1,21 +1,22 @@
 import React, { useState } from "react"
 import { Box, Flex, GridItem, SimpleGrid } from "@chakra-ui/react"
 
+import { cn } from "@/lib/utils/cn"
+import { MatomoEventOptions, trackCustomEvent } from "@/lib/utils/matomo"
+
 import Emoji from "./Emoji"
-import Text from "./OldText"
 import OldHeading from "./OldHeading"
+import Text from "./OldText"
 
-import { MatomoEventOptions, trackCustomEvent } from "../utils/matomo"
-
-export interface IBoxItem {
+export interface BoxItem {
   emoji: string
   title: string
   description: string
   matomo: MatomoEventOptions
 }
 
-export interface IProps {
-  items: Array<IBoxItem>
+export type BoxGridProps = {
+  items: Array<BoxItem>
 }
 
 // Represent string as 32-bit integer
@@ -40,7 +41,7 @@ const colors = [
   "gridPurple",
 ]
 
-const BoxGrid: React.FC<IProps> = ({ items }) => {
+const BoxGrid = ({ items }: BoxGridProps) => {
   const [indexOpen, setOpenIndex] = useState(0)
 
   return (
@@ -90,18 +91,13 @@ const BoxGrid: React.FC<IProps> = ({ items }) => {
             key={idx}
           >
             <Emoji
-              m={2}
+              className={cn(
+                "m-2 text-8xl",
+                isOpen
+                  ? "mb-8"
+                  : "self-center hover:rotate-12 hover:duration-500"
+              )}
               text={item.emoji}
-              fontSize="8xl"
-              {...(isOpen
-                ? { mb: 8 }
-                : {
-                    alignSelf: "center",
-                    _hover: {
-                      transition: "transform 50s",
-                      transform: "rotate(10turn)",
-                    },
-                  })}
             />
             <Box>
               <OldHeading

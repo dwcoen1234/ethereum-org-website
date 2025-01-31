@@ -6,28 +6,29 @@ import {
   TextProps,
   UnorderedList,
 } from "@chakra-ui/react"
+
 import Emoji from "../components/Emoji"
-import type { SimulatorData } from "../components/Simulator/types"
-import {
-  ConnectWeb3,
-  CreateAccount,
-  SendReceive,
-} from "../components/Simulator/screens"
-import {
-  CreateAccountIcon,
-  ConnectWeb3Icon,
-  SendReceiveIcon,
-} from "../components/Simulator/icons"
+import GlossaryTooltip from "../components/Glossary/GlossaryTooltip"
+import Link from "../components/Link"
 import {
   CONNECT_WEB3,
   CREATE_ACCOUNT,
   SEND_RECEIVE,
 } from "../components/Simulator/constants"
-import Link from "../components/Link"
-import GlossaryTooltip from "../components/Glossary/GlossaryTooltip"
+import {
+  ConnectWeb3Icon,
+  CreateAccountIcon,
+  SendReceiveIcon,
+} from "../components/Simulator/icons"
+import {
+  ConnectWeb3,
+  CreateAccount,
+  SendReceive,
+} from "../components/Simulator/screens"
 import { CONTACTS } from "../components/Simulator/screens/SendReceive/constants"
+import type { SimulatorData } from "../components/Simulator/types"
 
-const Text: React.FC<TextProps> = (props) => <ChakraText mb={4} {...props} />
+const Text = (props: TextProps) => <ChakraText mb={4} {...props} />
 
 export const walletOnboardingSimData: SimulatorData = {
   [CREATE_ACCOUNT]: {
@@ -39,20 +40,22 @@ export const walletOnboardingSimData: SimulatorData = {
         header: "Begin your journey by downloading a wallet",
         description: (
           <>
-            <Text>To get started, you'll need to download a wallet app.</Text>
+            <Text>
+              To get started, you&apos;ll need to download a wallet app.
+            </Text>
             <Text>
               Most people use mobile apps, but desktop apps and browser
               extensions are also available.
             </Text>
             <Text>
-              Let's set up a mobile wallet. Click "Install a wallet" to get
-              started.
+              Let&apos;s set up a mobile wallet. Click &quot;Install a
+              wallet&quot; to get started.
             </Text>
           </>
         ),
       },
       {
-        header: "They are free apps you can download",
+        header: "Wallets are free apps you can download",
         description: (
           <>
             <Text>
@@ -75,7 +78,9 @@ export const walletOnboardingSimData: SimulatorData = {
               Ethereum accounts are created privately and do not require any
               forms or approval—no personal identifying information required!
             </Text>
-            <Text>Click on "Create account" to generate a new account.</Text>
+            <Text>
+              Click on &quot;Create account&quot; to generate a new account.
+            </Text>
           </>
         ),
       },
@@ -98,8 +103,8 @@ export const walletOnboardingSimData: SimulatorData = {
               steps to backup and secure it.
             </Text>
             <Text>
-              Read carefully and click "I understand" to see and backup your
-              recovery phrase.
+              Read carefully and click &quot;I understand&quot; to see and
+              backup your recovery phrase.
             </Text>
           </>
         ),
@@ -113,7 +118,8 @@ export const walletOnboardingSimData: SimulatorData = {
             </Text>
             <UnorderedList listStyleType="none" mx={0} lineHeight={1}>
               <ListItem>
-                <Emoji text="✅" me={2} /> Consider saving in a password manager
+                <Emoji text="✅" className="me-2" /> Consider saving in a
+                password manager
               </ListItem>
             </UnorderedList>
             <Text fontWeight="bold" mb={2}>
@@ -121,15 +127,16 @@ export const walletOnboardingSimData: SimulatorData = {
             </Text>
             <UnorderedList listStyleType="none" mx={0} lineHeight={1}>
               <ListItem>
-                <Emoji text="✅" me={2} /> Write your recovery phrase down
+                <Emoji text="✅" className="me-2" /> Write your recovery phrase
+                down
               </ListItem>
               <ListItem>
-                <Emoji text="✅" me={2} /> Store it in a safe place (consider
-                multiple backups)
+                <Emoji text="✅" className="me-2" /> Store it in a safe place
+                (consider multiple backups)
               </ListItem>
               {/* TODO: Add link for seed phrase further reading */}
               {/* <ListItem>
-                <Emoji text="✅" me={2} />{" "}
+                <Emoji text="✅" className="me-2" />{" "}
                 <Link href="#TODO-link-out">
                   Learn more on protecting your recovery phrase
                 </Link>
@@ -140,15 +147,15 @@ export const walletOnboardingSimData: SimulatorData = {
             </Text>
             <UnorderedList listStyleType="none" mx={0} lineHeight={1}>
               <ListItem>
-                <Emoji text="❌" me={2} />
+                <Emoji text="❌" className="me-2" />
                 Texting it to a friend (or anyone!)
               </ListItem>
               <ListItem>
-                <Emoji text="❌" me={2} />
+                <Emoji text="❌" className="me-2" />
                 Taking a picture of the phrase
               </ListItem>
               <ListItem>
-                <Emoji text="❌" me={2} />
+                <Emoji text="❌" className="me-2" />
                 Saving it in a file on your computer
               </ListItem>
             </UnorderedList>
@@ -168,17 +175,17 @@ export const walletOnboardingSimData: SimulatorData = {
               should <em>ever</em> ask you for this.
             </Text>
             <Text>
-              Click the words in the correct order to prove you've backed up
-              your phrase.
+              Click the words in the correct order to prove you&apos;ve backed
+              up your phrase.
             </Text>
           </>
         ),
       },
       {
-        header: "Thats it! Welcome to Ethereum 🎉",
+        header: "That's it! Welcome to Ethereum 🎉",
         description: (
           <Text>
-            In the next lesson we'll learn how to use your new account to
+            In the next lesson we&apos;ll learn how to use your new account to
             receive and send some funds.
           </Text>
         ),
@@ -195,7 +202,7 @@ export const walletOnboardingSimData: SimulatorData = {
     ],
     finalCtaLink: {
       label: "Download a real wallet",
-      href: "https://ethereum.org/wallets/find-wallet/", // Full path to treat as external
+      href: "/wallets/find-wallet/",
     },
     nextPathId: SEND_RECEIVE,
   },
@@ -212,14 +219,16 @@ export const walletOnboardingSimData: SimulatorData = {
               Your wallet helps you manage your funds,{" "}
               <GlossaryTooltip termKey="nft">NFTs</GlossaryTooltip>,{" "}
               <GlossaryTooltip termKey="web3">Web3</GlossaryTooltip> identity
-              and more. Here we'll go over how to receive and send some tokens
-              on Ethereum.
+              and more. Here we&apos;ll go over how to receive and send some
+              tokens on Ethereum.
             </Text>
             <Text>
-              Let's first look at how to receive Ether, Ethereum's native
-              currency.
+              Let&apos;s first look at how to receive ether (ETH),
+              Ethereum&apos;s native currency.
             </Text>
-            <Text>Click the "Receive" button to see how to receive funds.</Text>
+            <Text>
+              Click the &quot;Receive&quot; button to see how to receive funds.
+            </Text>
           </>
         ),
       },
@@ -241,7 +250,7 @@ export const walletOnboardingSimData: SimulatorData = {
         ),
       },
       {
-        header: "You received some ether! Now let's send some",
+        header: "You received ether (ETH)! Now let's send some",
         description: (
           <>
             <Text>
@@ -249,12 +258,13 @@ export const walletOnboardingSimData: SimulatorData = {
               submit transactions yourself.
             </Text>
             <Text>
-              Note that you didn't need to provide any personal information, or
-              have any funds to begin with to start receiving assets to your
-              address—receiving is free. <Emoji text="😁" />
+              Note that you didn&apos;t need to provide any personal
+              information, or have any funds to begin with to start receiving
+              assets to your address—receiving is free. <Emoji text="😁" />
             </Text>
             <Text>
-              Let's try sending some funds by clicking the "Send" button.
+              Let&apos;s try sending some ETH by clicking the &quot;Send&quot;
+              button.
             </Text>
           </>
         ),
@@ -268,10 +278,12 @@ export const walletOnboardingSimData: SimulatorData = {
               parties intervening and stopping your transactions.
             </Text>
             <Text>
-              Ethereum doesn't discriminate, and never stops, allowing you full
-              control over your funds—24/7.
+              Ethereum doesn&apos;t discriminate, and never stops, allowing you
+              full control over your funds—24/7.
             </Text>
-            <Text>Select an amount to send then click "Select recipient."</Text>
+            <Text>
+              Select an amount to send then click &quot;Select recipient.&quot;
+            </Text>
           </>
         ),
       },
@@ -286,7 +298,8 @@ export const walletOnboardingSimData: SimulatorData = {
             <Text>You can send tokens anywhere globally at any time.</Text>
             <Text>
               As you use your wallet, you can save users as contacts for
-              repeated use. Let's send some funds back to {CONTACTS[0].name}.
+              repeated use. Let&apos;s send some funds back to{" "}
+              {CONTACTS[0].name}.
             </Text>
           </>
         ),
@@ -319,7 +332,7 @@ export const walletOnboardingSimData: SimulatorData = {
     ctaLabels: ["", "Share address", "", "Select recipient", "", "Send now"],
     finalCtaLink: {
       label: "Download a real wallet",
-      href: "https://ethereum.org/wallets/find-wallet/", // Full path to treat as external
+      href: "/wallets/find-wallet/",
     },
     nextPathId: CONNECT_WEB3,
   },
@@ -333,11 +346,26 @@ export const walletOnboardingSimData: SimulatorData = {
         description: (
           <>
             <Text>
+              Your wallet can be used to connect to all sorts of applications,
+              allowing you to interact with your on-chain assets.
+            </Text>
+            <Text>
+              Your friend just sent an NFT art piece to your address! Let&apos;s
+              go to a new NFT marketplace website to view it.
+            </Text>
+          </>
+        ),
+      },
+      {
+        header: "No need to create a new account for each service",
+        description: (
+          <>
+            <Text>
               Your account is universal across all Ethereum and
               Ethereum-compatible applications.
             </Text>
             <Text>
-              There is no need to create a new account for each service.
+              Assets stored on-chain can be accessed from any application.
             </Text>
           </>
         ),
@@ -352,7 +380,8 @@ export const walletOnboardingSimData: SimulatorData = {
               Polygon or Optimism.
             </Text>
             <Text>
-              Assets stored on-chain can be accessed from any application.
+              Logins are handled by your wallet—no more creating insecure
+              passwords.
             </Text>
           </>
         ),
@@ -366,21 +395,24 @@ export const walletOnboardingSimData: SimulatorData = {
               Your personal information, such as email or phone number, is not
               needed to use Web3 apps—you only need a wallet.
             </Text>
+            <Text>
+              Also note there are no associated transaction fees here—signing in
+              using Ethereum is free, fast and easy!
+            </Text>
           </>
         ),
       },
-
       {
         header:
           "No geographical or political discrimination against who can use Ethereum services",
         description: (
           <>
-            <Text>You can use the same address on multiple devices.</Text>
+            <Text>There&apos;s the NFT you received!</Text>
             <Text>
               Wallets are technically only an interface to show you your balance
               and to make transactions—
               <strong>
-                your assets aren't stored inside the wallet, but on the
+                your assets aren&apos;t stored inside the wallet, but on the
                 blockchain.
               </strong>
             </Text>
@@ -392,7 +424,7 @@ export const walletOnboardingSimData: SimulatorData = {
         description: (
           <>
             <Text>
-              Great job! You're ready to start using apps on Ethereum.
+              Great job! You&apos;re ready to start using apps on Ethereum.
             </Text>
             <Text fontWeight="bold" mb={2}>
               What to do next:
@@ -413,6 +445,7 @@ export const walletOnboardingSimData: SimulatorData = {
       },
     ],
     ctaLabels: [
+      "Visit NFT market",
       "Connect wallet",
       "Connect to app",
       "Go to account",
@@ -420,7 +453,7 @@ export const walletOnboardingSimData: SimulatorData = {
     ],
     finalCtaLink: {
       label: "Get a wallet",
-      href: "https://ethereum.org/wallets/find-wallet/", // Full path to treat as external
+      href: "/wallets/find-wallet/",
       isPrimary: true,
     },
   },

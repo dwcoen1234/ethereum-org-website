@@ -1,45 +1,44 @@
-import React, { ReactNode } from "react"
-import { Heading, Stack, StackProps, Text } from "@chakra-ui/react"
-import Emoji from "../Emoji"
+import { ReactNode } from "react"
 
-export interface IProps extends Omit<StackProps, "children" | "title"> {
+import Emoji from "@/components/Emoji"
+
+import { cn } from "@/lib/utils/cn"
+
+export type CardProps = {
   children?: ReactNode
   emoji?: string
   title?: ReactNode
   description?: ReactNode
+  className?: string
 }
 
-const Card: React.FC<IProps> = ({
+const Card = ({
   emoji,
   title,
   description,
   children,
+  className,
   ...props
-}) => (
-  <Stack
-    spacing="4"
-    justifyContent="space-between"
-    bg="ednBackground"
-    borderRadius="sm"
-    border="1px"
-    borderStyle="solid"
-    borderColor="lightBorder"
-    p="6"
+}: CardProps) => (
+  <div
+    className={cn(
+      "flex flex-col justify-between space-y-4",
+      "rounded-sm bg-background-highlight",
+      "border border-solid",
+      "p-6",
+      className
+    )}
     {...props}
   >
-    <Stack spacing="4">
-      {emoji && <Emoji fontSize="5xl" lineHeight={0} text={emoji} />}
-      <Stack spacing="8">
-        {title && (
-          <Heading as="h3" fontSize="2xl">
-            {title}
-          </Heading>
-        )}
-        {description && <Text opacity={0.8}>{description}</Text>}
-      </Stack>
-    </Stack>
+    <div className="flex flex-col space-y-4">
+      {emoji && <Emoji className="text-5xl leading-none" text={emoji} />}
+      <div className="flex flex-col space-y-8">
+        {title && <h3 className="text-2xl leading-[1.4]">{title}</h3>}
+        {description && <p>{description}</p>}
+      </div>
+    </div>
     {children}
-  </Stack>
+  </div>
 )
 
 export default Card

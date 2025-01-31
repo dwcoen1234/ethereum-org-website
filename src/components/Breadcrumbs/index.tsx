@@ -1,20 +1,27 @@
-import React from "react"
-import { useTranslation, useI18next } from "gatsby-plugin-react-i18next"
+import { Fragment } from "react"
+import { useRouter } from "next/router"
+import { useTranslation } from "next-i18next"
+
+import type { Lang } from "@/lib/types"
+
+import { isLangRightToLeft } from "@/lib/utils/translations"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbProps,
-} from "@chakra-ui/react"
+  BreadcrumbSeparator,
+} from "../ui/breadcrumb"
 
-import { BaseLink } from "../Link"
-
-export interface IProps extends BreadcrumbProps {
+export type BreadcrumbsProps = BreadcrumbProps & {
   slug: string
   startDepth?: number
 }
 
-interface Crumb {
+type Crumb = {
   fullPath: string
   text: string
 }
@@ -32,17 +39,12 @@ interface Crumb {
 //   { fullPath: "/en/eth2/", text: "ETH2" },
 //   { fullPath: "/en/eth2/proof-of-stake/", text: "PROOF OF STAKE" },
 // ]
-const Breadcrumbs: React.FC<IProps> = ({
-  slug: originalSlug,
-  startDepth = 0,
-  ...restProps
-}) => {
-  const { t } = useTranslation()
-  const { language } = useI18next()
+const Breadcrumbs = ({ slug, startDepth = 0, ...props }: BreadcrumbsProps) => {
+  const { t } = useTranslation("common")
+  const { locale, asPath } = useRouter()
+  const dir = isLangRightToLeft(locale! as Lang) ? "rtl" : "ltr"
 
-  const hasHome = originalSlug.includes(`/${language}/`)
-  const slug = originalSlug.replace(`/${language}/`, "/")
-
+  const hasHome = asPath !== "/"
   const slugChunk = slug.split("/")
   const sliced = slugChunk.filter((item) => !!item)
 
@@ -56,63 +58,38 @@ const Breadcrumbs: React.FC<IProps> = ({
           },
         ]
       : []),
-    ,
-    ...sliced.map((path, idx) => {
-      return {
-        fullPath: slugChunk.slice(0, idx + 2).join("/") + "/",
-        text: t(path),
-      }
-    }),
+    ...sliced.map((path, idx) => ({
+      fullPath: slugChunk.slice(0, idx + 2).join("/") + "/",
+      text: t(path),
+    })),
   ]
     .filter((item): item is Crumb => !!item)
     .slice(startDepth)
 
   return (
-    <Breadcrumb
-      dir="auto"
-      position="relative"
-      zIndex="1"
-      mb={8}
-      spacing="2.5"
-      listProps={{
-        m: 0,
-        lineHeight: 1.6,
-        flexWrap: "wrap",
-      }}
-      {...restProps}
-    >
-      {crumbs.map((crumb, idx) => {
-        const isCurrentPage = slug === crumb.fullPath
-        return (
-          <BreadcrumbItem
-            key={idx}
-            isCurrentPage={isCurrentPage}
-            color="body.medium"
-            letterSpacing="wider"
-            m={0}
-          >
-            <BreadcrumbLink
-              as={BaseLink}
-              to={crumb.fullPath}
-              isPartiallyActive={isCurrentPage}
-              fontWeight="normal"
-              _hover={{ color: "primary.base", textDecor: "none" }}
-              _active={{ color: "primary.base" }}
-              sx={{
-                /*
-                 * Redundancy to ensure styling on the active
-                 * link is applied.
-                 */
-                '&[aria-current="page"]': {
-                  color: "primary.base",
-                },
-              }}
-            >
-              {crumb.text.toUpperCase()}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        )
-      })}
+    <Breadcrumb {...props} dir={dir}>
+      <BreadcrumbList>
+        {crumbs.map(({ fullPath, text }) => {
+          const normalizePath = (path) => path.replace(/\/$/, "") // Remove trailing slash
+          const isCurrentPage = normalizePath(slug) === normalizePath(fullPath)
+          return (
+            <Fragment key={fullPath}>
+              <BreadcrumbItem>
+                {isCurrentPage ? (
+                  <BreadcrumbPage>{text}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink href={fullPath}>{text}</BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {!isCurrentPage && (
+                <BreadcrumbSeparator className="me-[0.625rem] ms-[0.625rem] text-gray-400">
+                  /
+                </BreadcrumbSeparator>
+              )}
+            </Fragment>
+          )
+        })}
+      </BreadcrumbList>
     </Breadcrumb>
   )
 }

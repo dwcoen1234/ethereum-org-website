@@ -1,37 +1,65 @@
 import React from "react"
-import { OrderedList } from "@chakra-ui/react"
+
+import type { QuizKey, QuizzesSection, UserStats } from "@/lib/types"
+
+import { trackCustomEvent } from "@/lib/utils/matomo"
+
+import allQuizzesData from "@/data/quizzes"
+
+import { Stack } from "../ui/flex"
+import { OrderedList } from "../ui/list"
 
 import QuizItem from "./QuizItem"
 
-import { QuizzesSection } from "../../types"
-
-interface IProps {
-  content: Array<QuizzesSection>
-  quizHandler: (id: string) => void
+type QuizzesListProps = {
+  userStats: UserStats
+  content: QuizzesSection[]
+  headingId: string
+  descriptionId: string
+  quizHandler: (id: QuizKey) => void
   modalHandler: (isModalOpen: boolean) => void
 }
 
-const QuizzesList: React.FC<IProps> = ({
+const QuizzesList = ({
   content,
+  userStats,
+  headingId,
+  descriptionId,
   quizHandler,
   modalHandler,
-}) => (
-  <OrderedList m={0} listStyleType="none" sx={{ counterReset: "list-counter" }}>
-    {content.map((listItem) => {
-      const { id, level, next } = listItem
+}: QuizzesListProps) => (
+  <Stack className="gap-8 pt-12 max-lg:px-8">
+    <Stack className="gap-8">
+      <h2>{headingId}</h2>
+      <p>{descriptionId}</p>
+    </Stack>
 
-      return (
-        <QuizItem
-          key={id}
-          id={id}
-          level={level}
-          next={next}
-          quizHandler={quizHandler}
-          modalHandler={modalHandler}
-        />
-      )
-    })}
-  </OrderedList>
+    <OrderedList className="m-0 list-none [counter-reset:_list-counter]">
+      {content.map((listItem) => {
+        const handleStart = () => {
+          quizHandler(listItem.id)
+          modalHandler(true)
+
+          trackCustomEvent({
+            eventCategory: "quiz_hub_events",
+            eventAction: "quizzes click",
+            eventName: `${listItem.id}`,
+          })
+        }
+
+        return (
+          <QuizItem
+            key={listItem.id}
+            {...listItem}
+            isCompleted={userStats.completed[listItem.id]?.[0]}
+            numberOfQuestions={allQuizzesData[listItem.id].questions.length}
+            titleId={allQuizzesData[listItem.id].title}
+            handleStart={handleStart}
+          />
+        )
+      })}
+    </OrderedList>
+  </Stack>
 )
 
 export default QuizzesList
