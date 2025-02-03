@@ -1,25 +1,26 @@
-import { Flex, Icon, Text } from "@chakra-ui/react"
+import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import React, { useEffect, useMemo, useState } from "react"
 import { MdClose, MdInfo } from "react-icons/md"
-import { SimulatorNavProps } from "../../interfaces"
-import type { TokenBalance } from "../../WalletHome/interfaces"
-import { WalletHome } from "../../WalletHome"
-import { getMaxFractionDigitsUsd } from "../../utils"
 
-interface IProps extends SimulatorNavProps {
+import type { SimulatorNavProps } from "@/lib/types"
+
+import { getMaxFractionDigitsUsd } from "../../utils"
+import { WalletHome } from "../../WalletHome"
+import type { TokenBalance } from "../../WalletHome/interfaces"
+
+type ReceivedEtherProps = SimulatorNavProps & {
   defaultTokenBalances: Array<TokenBalance>
   ethReceiveAmount: number
   ethPrice: number
   sender?: string
 }
-export const ReceivedEther: React.FC<IProps> = ({
+export const ReceivedEther = ({
   nav,
   defaultTokenBalances,
   ethReceiveAmount,
   ethPrice,
   sender,
-}) => {
+}: ReceivedEtherProps) => {
   const [received, setReceived] = useState(false)
   const [hideToast, setHideToast] = useState(false)
   const showToast = received && !hideToast
@@ -54,7 +55,7 @@ export const ReceivedEther: React.FC<IProps> = ({
             }
           : token
       ),
-    [ethPrice]
+    [defaultTokenBalances, ethPrice, ethReceiveAmount]
   )
 
   const tokenBalances = received ? tokensWithEthBalance : defaultTokenBalances
@@ -83,32 +84,20 @@ export const ReceivedEther: React.FC<IProps> = ({
       />
       <AnimatePresence>
         {showToast && !hidden && (
-          <Flex
+          <motion.div
             key="toast"
-            position="absolute"
-            inset={4}
-            top="auto"
-            bottom={32}
-            borderRadius="base"
-            h="fit-content"
-            bg="primary300"
-            gap={3}
-            fontSize="md"
-            align="center"
-            p={4}
-            color="background.base"
-            as={motion.div}
+            className="absolute inset-4 bottom-32 top-auto flex h-fit items-center gap-3 rounded bg-primary-high-contrast p-4 text-md text-background"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Icon as={MdInfo} fontSize="xl" />
-            <Text m={0} fontWeight="bold" fontSize="xs">
+            <MdInfo className="text-xl" />
+            <p className="m-0 text-xs font-bold">
               You received {displayEth} ETH ({displayUsd})
               {sender ? ` from ${sender}` : ""}!
-            </Text>
-            <Icon as={MdClose} fontSize="xl" onClick={() => setHidden(true)} />
-          </Flex>
+            </p>
+            <MdClose className="text-xl" onClick={() => setHidden(true)} />
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.div>

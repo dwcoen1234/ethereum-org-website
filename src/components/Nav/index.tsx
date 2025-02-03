@@ -1,153 +1,91 @@
-import React, { FC, useRef } from "react"
-import { Icon, Flex, Box, HStack, useDisclosure } from "@chakra-ui/react"
-import { MdWbSunny, MdBrightness2, MdLanguage } from "react-icons/md"
+import { useRef } from "react"
+import dynamic from "next/dynamic"
+import { useTranslation } from "next-i18next"
 
-import Menu from "./Menu"
-import MobileNavMenu from "./Mobile"
-import ButtonLink from "../ButtonLink"
-import Link, { BaseLink } from "../Link"
-import Search from "../Search"
-import IconButton from "../IconButton"
-import { EthHomeIcon } from "../icons"
+import { EthHomeIcon } from "@/components/icons"
+import Search from "@/components/Search"
+
+import SearchButton from "../Search/SearchButton"
+import SearchInputButton from "../Search/SearchInputButton"
+import { BaseLink } from "../ui/Link"
+
+import DesktopNavMenu from "./Desktop"
 import { useNav } from "./useNav"
 
-export interface IProps {
-  path: string
-}
+import { useBreakpointValue } from "@/hooks/useBreakpointValue"
+import { useIsClient } from "@/hooks/useIsClient"
+
+const Menu = dynamic(() => import("./Menu"), {
+  ssr: false,
+  loading: () => <div />,
+})
+const MobileNavMenu = dynamic(() => import("./Mobile"), { ssr: false })
 
 // TODO display page title on mobile
-const Nav: FC<IProps> = ({ path }) => {
-  const {
-    ednLinks,
-    fromPageParameter,
-    i18n,
-    isDarkTheme,
-    shouldShowSubNav,
-    t,
-    toggleColorMode,
-    linkSections,
-    mobileNavProps,
-  } = useNav({ path })
-  const searchModalDisclosure = useDisclosure()
-
+const Nav = () => {
+  const { toggleColorMode, linkSections } = useNav()
+  const { t } = useTranslation("common")
   const navWrapperRef = useRef(null)
+  const isClient = useIsClient()
+  const desktopScreen = useBreakpointValue({ base: false, md: true })
 
   return (
-    <Box position="sticky" top={0} zIndex={100} width="full">
-      <Flex
+    <div className="sticky top-0 z-sticky w-full">
+      <nav
         ref={navWrapperRef}
-        as="nav"
+        className="flex h-19 justify-center border-b border-b-disabled bg-background p-4 xl:px-8"
         aria-label={t("nav-primary")}
-        bg="background.base"
-        borderBottom="1px"
-        borderColor="rgba(0, 0, 0, 0.1)"
-        height="4.75rem"
-        justifyContent="center"
-        py={4}
-        px={{ base: 4, xl: 8 }}
       >
-        <Flex
-          alignItems={{ base: "center", lg: "normal" }}
-          justifyContent={{ base: "space-between", lg: "normal" }}
-          width="full"
-          maxW="container.2xl"
-        >
+        <div className="flex w-full max-w-screen-2xl items-center justify-between md:items-stretch md:justify-normal">
           <BaseLink
-            to="/"
+            href="/"
             aria-label={t("home")}
-            display="inline-flex"
-            alignItems="center"
-            textDecor="none"
+            className="inline-flex items-center no-underline"
           >
-            <EthHomeIcon opacity={0.85} _hover={{ opacity: 1 }} />
+            <EthHomeIcon className="h-[35px] w-[22px] opacity-85 hover:opacity-100" />
           </BaseLink>
           {/* Desktop */}
-          <Flex
-            w="full"
-            justifyContent={{ base: "flex-end", lg: "space-between" }}
-            ml={{ base: 3, xl: 8 }}
-          >
-            <Menu hideBelow="lg" path={path} sections={linkSections} />
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-              gap={{ base: 2, xl: 4 }}
-            >
-              <Search {...searchModalDisclosure} />
-              {/* Mobile */}
-              <MobileNavMenu
-                {...mobileNavProps}
-                hideFrom="lg"
-                toggleSearch={searchModalDisclosure.onOpen}
-                drawerContainerRef={navWrapperRef}
-              />
-              <HStack spacing={2} hideBelow="lg">
-                <IconButton
-                  icon={isDarkTheme ? <MdWbSunny /> : <MdBrightness2 />}
-                  aria-label={
-                    isDarkTheme
-                      ? "Switch to Light Theme"
-                      : "Switch to Dark Theme"
-                  }
-                  variant="ghost"
-                  isSecondary
-                  px={1.5}
-                  onClick={toggleColorMode}
-                ></IconButton>
-                <ButtonLink
-                  to={`/languages/${fromPageParameter}`}
-                  leftIcon={<Icon as={MdLanguage} />}
-                  variant="ghost"
-                  isSecondary
-                  px={1.5}
-                >
-                  {t("languages")} {i18n.language.toUpperCase()}
-                </ButtonLink>
-              </HStack>
-            </Flex>
-          </Flex>
-        </Flex>
-      </Flex>
-      {shouldShowSubNav && (
-        <Flex
-          as="nav"
-          aria-label={t("nav-developers")}
-          display={{ base: "none", lg: "flex" }}
-          bg="ednBackground"
-          borderBottom="1px"
-          borderColor="border"
-          boxSizing="border-box"
-          py={4}
-          px={8}
-        >
-          {ednLinks.map((link, idx) => (
-            <BaseLink
-              key={idx}
-              to={link.to}
-              isPartiallyActive={link.isPartiallyActive}
-              color="text"
-              fontWeight="normal"
-              textDecor="none"
-              mr={8}
-              _hover={{
-                color: "primary.base",
-                svg: {
-                  fill: "currentColor",
-                },
+          <div className="ms-3 flex w-full justify-end md:justify-between xl:ms-8">
+            {/* avoid rendering desktop Menu version on mobile */}
+            {isClient && desktopScreen ? (
+              <Menu className="hidden md:block" sections={linkSections} />
+            ) : (
+              <div />
+            )}
+
+            <Search>
+              {({ onOpen }) => {
+                if (!isClient) return null
+
+                return (
+                  <div className="flex items-center">
+                    {/* Desktop */}
+                    <div className="hidden md:flex">
+                      <SearchButton className="xl:hidden" onClick={onOpen} />
+                      <SearchInputButton
+                        className="hidden xl:flex"
+                        onClick={onOpen}
+                      />
+                      <DesktopNavMenu toggleColorMode={toggleColorMode} />
+                    </div>
+
+                    <div className="flex md:hidden">
+                      {/* Mobile */}
+                      <SearchButton onClick={onOpen} />
+                      <MobileNavMenu
+                        toggleColorMode={toggleColorMode}
+                        linkSections={linkSections}
+                        toggleSearch={onOpen}
+                      />
+                    </div>
+                  </div>
+                )
               }}
-              _visited={{}}
-              sx={{
-                svg: {
-                  fill: "currentColor",
-                },
-              }}
-            >
-              {link.text}
-            </BaseLink>
-          ))}
-        </Flex>
-      )}
-    </Box>
+            </Search>
+          </div>
+        </div>
+      </nav>
+    </div>
   )
 }
 

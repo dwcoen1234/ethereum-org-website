@@ -1,42 +1,44 @@
-import React, { useContext } from "react"
-import {
-  Modal as ChakraModal,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
-  ModalProps,
-} from "@chakra-ui/react"
+import { QuizStatus } from "@/lib/types"
 
-import { QuizzesHubContext } from "./context"
+import Modal, { type ModalProps } from "../ui/dialog-modal"
+import { Center } from "../ui/flex"
 
-interface IProps extends ModalProps {
+import { useBreakpointValue } from "@/hooks/useBreakpointValue"
+
+type QuizzesModalProps = {
+  isQuizModalOpen: boolean
+  onQuizModalOpenChange: (open: boolean) => void
   children: React.ReactNode
+  quizStatus: QuizStatus
 }
 
-const QuizzesModal: React.FC<IProps> = ({ children, ...rest }) => {
-  const { status: quizStatus } = useContext(QuizzesHubContext)
+const QuizzesModal = ({
+  children,
+  quizStatus,
+  isQuizModalOpen,
+  onQuizModalOpenChange,
+  ...props
+}: QuizzesModalProps) => {
+  // TODO: remove bang in utility class names when Modal is migrated
+  const getStatusColorClass = () => {
+    if (quizStatus === "neutral") return "!bg-background"
+    if (quizStatus === "success")
+      return "!bg-success-light dark:!bg-success-dark"
+    return "!bg-error-light dark:!bg-error-dark"
+  }
 
-  const statusColor =
-    quizStatus === "neutral"
-      ? "neutral"
-      : quizStatus === "success"
-      ? "success.light"
-      : "error.light"
+  const size = useBreakpointValue<ModalProps["size"]>({ base: "xl", md: "md" })!
 
   return (
-    <ChakraModal
-      isCentered
-      size={{ base: "full", md: "xl" }}
-      scrollBehavior="inside"
-      {...rest}
+    <Modal
+      open={isQuizModalOpen}
+      onOpenChange={onQuizModalOpenChange}
+      size={size}
+      contentProps={{ className: getStatusColorClass() }}
+      {...props}
     >
-      <ModalOverlay bg="blackAlpha.700" hideBelow="md" />
-
-      <ModalContent justifyContent="center" bg={statusColor}>
-        <ModalCloseButton size="lg" p={6} zIndex={1} />
-        {children}
-      </ModalContent>
-    </ChakraModal>
+      <Center>{children}</Center>
+    </Modal>
   )
 }
 

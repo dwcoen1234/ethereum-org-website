@@ -1,31 +1,55 @@
-import React from "react"
-import { Box, Text } from "@chakra-ui/react"
+import { ComponentProps } from "react"
 
-import Translation from "../../Translation"
-import OldHeading from "../../OldHeading"
+import IdAnchor from "@/components/IdAnchor"
+import Translation from "@/components/Translation"
+import { Stack } from "@/components/ui/flex"
+import InlineLink from "@/components/ui/Link"
 
-interface IProps {
+import { cn } from "@/lib/utils/cn"
+
+import { DEFAULT_GLOSSARY_NS } from "@/lib/constants"
+
+interface GlossaryDefinitionProps {
   term: string
   size?: "md" | "sm"
+  options?: ComponentProps<typeof Translation>["options"]
 }
 
-const GlossaryDefinition: React.FC<IProps> = ({ term, size = "md" }) => {
-  const headingStyles =
-    size === "sm"
-      ? { fontSize: "md", mt: 0, mb: 2 }
-      : { fontSize: { base: "xl", md: "2xl" } }
+// Override the default `a` mapping to prevent displaying the glossary tooltip
+// in the glossary definition
+const components = {
+  a: InlineLink,
+}
 
-  const textStyles = size === "sm" ? { mb: 0 } : {}
+const GlossaryDefinition = ({
+  term,
+  size = "md",
+  options = { ns: DEFAULT_GLOSSARY_NS },
+}: GlossaryDefinitionProps) => {
+  const textClasses = size === "sm" ? "mb-0" : ""
 
   return (
-    <Box>
-      <OldHeading as="h3" lineHeight={1.4} id={term} {...headingStyles}>
-        <Translation id={`${term}-term`} />
-      </OldHeading>
-      <Text {...textStyles}>
-        <Translation id={`${term}-definition`} />
-      </Text>
-    </Box>
+    <Stack className="mb-8 items-stretch gap-4 text-start">
+      <h4
+        className={term ? "group relative scroll-mt-28" : ""}
+        {...(term ? { "data-group": true, id: term } : {})}
+      >
+        <IdAnchor id={term} />
+        <Translation
+          id={term + "-term"}
+          options={options}
+          transform={components}
+        />
+      </h4>
+
+      <div className={cn("inline-block", textClasses)}>
+        <Translation
+          id={term + "-definition"}
+          options={options}
+          transform={components}
+        />
+      </div>
+    </Stack>
   )
 }
 

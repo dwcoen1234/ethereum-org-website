@@ -1,68 +1,83 @@
-import { StorybookConfig } from "@storybook/react-webpack5"
+import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin"
 import { propNames } from "@chakra-ui/react"
-import { babelConfig } from "./babel-storybook-config"
+import type { StorybookConfig } from "@storybook/nextjs"
+
+/**
+ * Note regarding package.json settings related to Storybook:
+ *
+ * There is a resolutions option set for the package `jackspeak`. This is related to a
+ * workaround provided to make sure storybook ( as of v7.5.2) works correctly with
+ * Yarn v1
+ *
+ * Reference: https://github.com/storybookjs/storybook/issues/22431#issuecomment-1630086092
+ *
+ * The primary recommendation is to upgrade to Yarn 3 if possible
+ */
 
 const config: StorybookConfig = {
-  stories: ["../src/components/**/*.stories.tsx"],
+  stories: [
+    "../src/components/**/*.stories.{ts,tsx}",
+    "../src/@chakra-ui/stories/*.stories.tsx",
+    "../src/layouts/stories/*.stories.tsx",
+  ],
   addons: [
     "@storybook/addon-links",
-    "@storybook/addon-essentials",
+    {
+      name: "@storybook/addon-essentials",
+      options: {
+        backgrounds: false,
+      },
+    },
     "@storybook/addon-interactions",
-    // https://storybook.js.org/addons/@storybook/addon-a11y/
-    "@storybook/addon-a11y",
-    "@chakra-ui/storybook-addon",
     "storybook-react-i18next",
+    "@storybook/addon-themes",
+    "@chromatic-com/storybook",
   ],
-  staticDirs: ["../static"],
-  babel: async () => ({
-    ...babelConfig,
-  }),
+  staticDirs: ["../public"],
   framework: {
-    name: "@storybook/react-webpack5",
+    name: "@storybook/nextjs",
     options: {},
+  },
+  docs: {
+    autodocs: "tag",
   },
   refs: {
     "@chakra-ui/react": {
       disable: true,
     },
   },
-  features: {},
   webpackFinal: async (config) => {
-    if (
-      config.module != undefined &&
-      config.module.rules != undefined &&
-      config.module.rules[0] !== "..."
-    ) {
-      config.module.rules[0].exclude = [/node_modules\/(?!(gatsby)\/)/]
-      config.module.rules[0].use = [
-        {
-          loader: require.resolve("babel-loader"),
-          options: {
-            presets: [
-              // use @babel/preset-react for JSX and env (instead of staged presets)
-              require.resolve("@babel/preset-react"),
-              require.resolve("@babel/preset-env"),
-            ],
-            plugins: [
-              // use babel-plugin-remove-graphql-queries to remove static queries from components when rendering in storybook
-              require.resolve("babel-plugin-remove-graphql-queries"),
-            ],
-          },
-        },
+    config.module = config.module || {}
+    config.module.rules = config.module.rules || []
+
+    if (config.resolve) {
+      config.resolve.plugins = [
+        ...(config.resolve.plugins || []),
+        new TsconfigPathsPlugin({
+          extensions: config.resolve.extensions,
+        }),
       ]
     }
+
+    // This modifies the existing image rule to exclude .svg files
+    // since you want to handle those files with @svgr/webpack
+    const imageRule = config.module.rules.find((rule) =>
+      rule?.["test"]?.test(".svg")
+    )
+    if (imageRule) {
+      imageRule["exclude"] = /\.svg$/
+    }
+
+    // Configure .svg files to be loaded with @svgr/webpack
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    })
 
     return config
   },
   typescript: {
-    check: false,
-    checkOptions: {},
-    reactDocgen: "react-docgen-typescript",
     reactDocgenTypescriptOptions: {
-      compilerOptions: {
-        allowSyntheticDefaultImports: false,
-        esModuleInterop: false,
-      },
       shouldExtractLiteralValuesFromEnum: true,
       /**
        * For handling bloated controls table of Chakra Props
@@ -82,7 +97,8 @@ const config: StorybookConfig = {
         return !(isStyledSystemProp || isHTMLElementProp)
       },
     },
+
+    reactDocgen: "react-docgen-typescript",
   },
 }
-
 export default config

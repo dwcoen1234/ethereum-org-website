@@ -1,19 +1,16 @@
-import {
-  Box,
-  Flex,
-  type FlexProps,
-  Image,
-  Text,
-  useBreakpointValue,
-} from "@chakra-ui/react"
-import { GatsbyImage } from "gatsby-plugin-image"
 import React from "react"
+import { Box, Flex, type FlexProps, Text } from "@chakra-ui/react"
+
+import { Image } from "@/components/Image"
+
 import type { NFT } from "./interfaces"
 
-interface IProps extends FlexProps {
+import { useBreakpointValue } from "@/hooks/useBreakpointValue"
+
+type NFTListProps = FlexProps & {
   nfts: Array<NFT>
 }
-export const NFTList: React.FC<IProps> = ({ nfts, ...flexProps }) => {
+export const NFTList = ({ nfts, ...flexProps }: NFTListProps) => {
   const size = useBreakpointValue({ base: 20, md: 24 })
   return (
     <Flex w="full" gap={4} h="full" flexWrap="wrap" {...flexProps}>
@@ -21,10 +18,9 @@ export const NFTList: React.FC<IProps> = ({ nfts, ...flexProps }) => {
         nfts.map(({ title, image }) => (
           <Box key={title} w="fit-content">
             <Image
-              image={image}
-              as={GatsbyImage}
+              src={image}
               alt=""
-              fit="contain"
+              objectFit="contain"
               maxW={size}
               maxH={size}
             />

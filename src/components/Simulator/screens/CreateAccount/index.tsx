@@ -1,8 +1,12 @@
 import React, { useState } from "react"
-import type { PhoneScreenProps } from "../../interfaces"
-import { generateInvalidSafeSeed } from "../../../../utils/generateSeed"
+
+import type { PhoneScreenProps } from "@/lib/types"
+
+import { generateInvalidSafeSeed } from "@/lib/utils/generateSeed"
+
 import { ProgressCta } from "../../ProgressCta"
 import { WalletHome } from "../../WalletHome"
+
 import { GeneratingKeys } from "./GeneratingKeys"
 import { HomeScreen } from "./HomeScreen"
 import { InitialWordDisplay } from "./InitialWordDisplay"
@@ -10,10 +14,7 @@ import { InteractiveWordSelector } from "./InteractiveWordSelector"
 import { RecoveryPhraseNotice } from "./RecoveryPhraseNotice"
 import { WelcomeScreen } from "./WelcomeScreen"
 
-export const CreateAccount: React.FC<PhoneScreenProps> = ({
-  nav,
-  ctaLabel,
-}) => {
+export const CreateAccount = ({ nav, ctaLabel }: PhoneScreenProps) => {
   const { progressStepper, step } = nav
   const [words, setWords] = useState<Array<string>>(generateInvalidSafeSeed())
   const [categoryIndex, setCategoryIndex] = useState(0)
@@ -47,7 +48,9 @@ export const CreateAccount: React.FC<PhoneScreenProps> = ({
         <ProgressCta
           isAnimated={step === 0}
           progressStepper={progressStepper}
-          bg={[5].includes(step) ? "background.base" : "background.highlight"}
+          className={
+            [5].includes(step) ? "bg-background" : "bg-background-highlight"
+          }
         >
           {ctaLabel}
         </ProgressCta>

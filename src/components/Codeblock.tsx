@@ -1,35 +1,37 @@
 import React, { useState } from "react"
-import { Box, BoxProps, Flex, useColorModeValue } from "@chakra-ui/react"
+import { useTranslation } from "next-i18next"
 import Highlight, {
   defaultProps,
   Language,
   PrismTheme,
 } from "prism-react-renderer"
+import Prism from "prism-react-renderer/prism"
 
-import Translation from "./Translation"
-import CopyToClipboard from "./CopyToClipboard"
-import Emoji from "./Emoji"
+// https://github.com/FormidableLabs/prism-react-renderer/tree/master#custom-language-support
+import CopyToClipboard from "@/components/CopyToClipboard"
+import Emoji from "@/components/Emoji"
+import { Flex } from "@/components/ui/flex"
 
-const LINES_BEFORE_COLLAPSABLE = 8
+import { cn } from "@/lib/utils/cn"
 
-const TopBarItem = (props: BoxProps) => {
-  const bgColor = useColorModeValue("#f7f7f7", "#363641")
+import { LINES_BEFORE_COLLAPSABLE } from "@/lib/constants"
 
+import useColorModeValue from "@/hooks/useColorModeValue"
+;(typeof global !== "undefined" ? global : window).Prism = Prism
+require("prismjs/components/prism-solidity")
+
+const TopBarItem = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <Box
-      border="1px"
-      borderRadius="base"
-      borderColor="searchBorder"
-      bg={bgColor}
-      ml={2}
-      py={1}
-      px={2}
-      _hover={{
-        cursor: "pointer",
-        color: "text100",
-        transform: "scale(1.04)",
-        boxShadow: "1px 1px 8px 1px rgba(0, 0, 0, 0.5)",
-      }}
+    <div
+      className={cn(
+        "ms-2 rounded border px-2 py-1 shadow-[1px_1px_8px_1px_rgba(var(--black),_0.5)] transition-transform duration-100",
+        "hover:scale-105 hover:cursor-pointer hover:bg-gray-200 hover:shadow-md hover:transition-transform hover:duration-100",
+        "bg-background-highlight hover:bg-background",
+        className
+      )}
       {...props}
     />
   )
@@ -38,8 +40,8 @@ const TopBarItem = (props: BoxProps) => {
 const codeTheme = {
   light: {
     plain: {
-      backgroundColor: "#fafafa",
-      color: "#333333",
+      backgroundColor: "#f7f7f7", // background-highlight (gray-50)
+      color: "#6C24DF", // primary (purple-600)
     },
     styles: [
       {
@@ -110,8 +112,8 @@ const codeTheme = {
   dark: {
     // Pulled from `defaultProps.theme` for potential customization
     plain: {
-      backgroundColor: "#2a2734",
-      color: "#9a86fd",
+      backgroundColor: "#121212", // background-highlight (gray-900)
+      color: "#B38DF0", // primary (purple-400)
     },
     styles: [
       {
@@ -200,36 +202,40 @@ const getValidChildrenForCodeblock = (child) => {
   }
 }
 
-export interface IProps {
+export type CodeblockProps = React.HTMLAttributes<HTMLDivElement> & {
   allowCollapse?: boolean
   codeLanguage: string
   fromHomepage?: boolean
-  children: React.ReactChild
 }
 
-const Codeblock: React.FC<IProps> = ({
+const Codeblock = ({
   children,
   allowCollapse = true,
   codeLanguage,
   fromHomepage = false,
-}) => {
+  className,
+}: CodeblockProps) => {
+  const { t } = useTranslation("common")
   const selectedTheme = useColorModeValue(codeTheme.light, codeTheme.dark)
 
-  const codeText = React.Children.map(children, (child) => {
-    return getValidChildrenForCodeblock(child)
-  }).join("")
+  const codeText = React.Children.toArray(children)
+    .map((child) => {
+      if (!child) return
+      return getValidChildrenForCodeblock(child)
+    })
+    .join("")
 
   const [isCollapsed, setIsCollapsed] = useState(allowCollapse)
 
-  let className
+  let langClass: string
   if (React.isValidElement(children)) {
-    className = children?.props?.className
+    langClass = children?.props?.className
   } else {
-    className = codeLanguage || ""
+    langClass = codeLanguage || ""
   }
 
-  const matches = className?.match(/language-(?<lang>.*)/)
-  const language = matches?.groups?.lang || ""
+  const matches = langClass?.match(/language-(.*)/)
+  const language = matches?.[1] || ""
 
   const shouldShowCopyWidget = ["js", "json", "python", "solidity"].includes(
     language
@@ -243,18 +249,14 @@ const Codeblock: React.FC<IProps> = ({
   return (
     /* Overwrites codeblocks inheriting RTL styling in Right-To-Left script languages (e.g. Arabic) */
     /* Context: https://github.com/ethereum/ethereum-org-website/issues/6202 */
-    <Box position="relative" dir="ltr">
-      <Box
-        borderRadius="base"
-        border={fromHomepage ? "none" : "1px solid"}
-        borderColor="border"
-        maxH={
-          isCollapsed
+    <div className={cn("relative", className)} dir="ltr">
+      <div
+        className="overflow-scroll rounded"
+        style={{
+          maxHeight: isCollapsed
             ? `calc((1.2rem * ${LINES_BEFORE_COLLAPSABLE}) + 4.185rem)`
-            : "none"
-        }
-        overflow="scroll"
-        mb={fromHomepage ? 0 : 4}
+            : "none",
+        }}
       >
         <Highlight
           {...defaultProps}
@@ -263,61 +265,43 @@ const Codeblock: React.FC<IProps> = ({
           theme={selectedTheme as PrismTheme}
         >
           {({ className, style, tokens, getLineProps, getTokenProps }) => (
-            <Box
-              as="pre"
+            <pre
+              className={cn(
+                "m-0 w-fit min-w-full overflow-visible py-6 ps-4",
+                hasTopBar && "pt-[2.75rem]",
+                className
+              )}
               style={style}
-              className={className}
-              pt={hasTopBar ? "2.75rem" : 6}
-              pl={4}
-              m={0}
-              overflow="visible"
-              minW="full"
-              w="fit-content"
             >
               {tokens.map((line, i) => {
                 return i === tokens.length - 1 &&
                   line[0].content === "" ? null : (
-                  <Box
+                  <div
                     key={i}
-                    display="table-row"
+                    style={{ display: "table-row" }}
                     {...getLineProps({ line, key: i })}
                   >
                     {shouldShowLineNumbers && (
-                      <Box
-                        as="span"
-                        display="table-cell"
-                        textAlign="right"
-                        pr={8}
-                        userSelect="none"
-                        opacity={0.4}
-                      >
+                      <span className="table-cell select-none pe-8 text-end opacity-40">
                         {i + 1}
-                      </Box>
+                      </span>
                     )}
-                    <Box as="span" display="table-cell">
+                    <span className="table-cell">
                       {line.map((token, key) => (
                         <span key={key} {...getTokenProps({ token, key })} />
                       ))}
-                    </Box>
-                  </Box>
+                    </span>
+                  </div>
                 )
               })}
               {!fromHomepage && (
                 <Flex
-                  className={className}
-                  justify="flex-end"
-                  position="absolute"
-                  top={3}
-                  right={4}
+                  className={cn("absolute end-4 top-3 justify-end", className)}
                 >
                   {allowCollapse &&
                     totalLines - 1 > LINES_BEFORE_COLLAPSABLE && (
                       <TopBarItem onClick={() => setIsCollapsed(!isCollapsed)}>
-                        {isCollapsed ? (
-                          <Translation id="show-all" />
-                        ) : (
-                          <Translation id="show-less" />
-                        )}
+                        {isCollapsed ? t("show-all") : t("show-less")}
                       </TopBarItem>
                     )}
                   {shouldShowCopyWidget && (
@@ -326,13 +310,16 @@ const Codeblock: React.FC<IProps> = ({
                         <TopBarItem>
                           {!isCopied ? (
                             <>
-                              <Emoji text=":clipboard:" fontSize="md" />{" "}
-                              <Translation id="copy" />
+                              <Emoji text=":clipboard:" className="text-md" />{" "}
+                              {t("copy")}
                             </>
                           ) : (
                             <>
-                              <Emoji text=":white_check_mark:" fontSize="md" />{" "}
-                              <Translation id="copied" />
+                              <Emoji
+                                text=":white_check_mark:"
+                                className="text-md"
+                              />{" "}
+                              {t("copied")}
                             </>
                           )}
                         </TopBarItem>
@@ -341,11 +328,11 @@ const Codeblock: React.FC<IProps> = ({
                   )}
                 </Flex>
               )}
-            </Box>
+            </pre>
           )}
         </Highlight>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

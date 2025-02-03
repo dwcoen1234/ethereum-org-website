@@ -1,33 +1,30 @@
-import React from "react"
-import { Flex } from "@chakra-ui/react"
+import { useTranslation } from "next-i18next"
 
-import Translation from "../Translation"
-import Emoji from "../Emoji"
-import Link from "../Link"
-import Text from "../OldText"
+import Emoji from "@/components/Emoji"
 
-interface Props {
+import { cn } from "@/lib/utils/cn"
+
+import { Flex } from "../ui/flex"
+import { BaseLink } from "../ui/Link"
+
+type AssetDownloadArtistProps = {
   artistName: string
   artistUrl?: string
 }
 
-const AssetDownloadArtist = ({ artistName, artistUrl }: Props) => {
+const AssetDownloadArtist = ({
+  artistName,
+  artistUrl,
+}: AssetDownloadArtistProps) => {
+  const { t } = useTranslation("page-assets")
   return (
-    <Flex
-      mb={4}
-      border="1px"
-      borderTop="none"
-      borderColor="white700"
-      py={2}
-      px={4}
-      borderRadius="0 0 4px 4px"
-    >
-      <Flex mr={2} fontSize="md" textColor="text300">
-        <Emoji text=":artist_palette:" mr={2} fontSize="2xl" />
-        <Translation id="page-assets-download-artist" />
+    <Flex className={cn("mb-4 border border-t-0", "rounded-b px-4 py-2")}>
+      <Flex className="me-2">
+        <Emoji text=":artist_palette:" className="me-2 text-2xl" />
+        {t("page-assets-download-artist")}
       </Flex>
-      {artistUrl && <Link to={artistUrl}>{artistName}</Link>}
-      {!artistUrl && <Text m={0}>{artistName}</Text>}
+      {artistUrl && <BaseLink href={artistUrl}>{artistName}</BaseLink>}
+      {!artistUrl && <p>{artistName}</p>}
     </Flex>
   )
 }

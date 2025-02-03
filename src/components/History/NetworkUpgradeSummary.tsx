@@ -1,27 +1,27 @@
-// Libraries
-import React from "react"
-import { Flex, Stack, Text } from "@chakra-ui/react"
-import { useI18next } from "gatsby-plugin-react-i18next"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/router"
+import { useTranslation } from "next-i18next"
 
-// Components
+import type { Lang } from "@/lib/types"
+
+import { Flex, Stack } from "@/components/ui/flex"
+
+import { getLocaleForNumberFormat } from "@/lib/utils/translations"
+
+import NetworkUpgradeSummaryData from "../../data/NetworkUpgradeSummaryData"
 import Emoji from "../Emoji"
 import InlineLink from "../Link"
-import Translation from "../Translation"
 
-// Data
-import NetworkUpgradeSummaryData from "../../data/NetworkUpgradeSummaryData"
-
-// Utils
-import { Lang } from "../../utils/languages"
-import { getLocaleForNumberFormat } from "../../utils/translations"
-
-interface IProps {
+type NetworkUpgradeSummaryProps = {
   name: string
 }
 
-const NetworkUpgradeSummary: React.FC<IProps> = ({ name }) => {
-  const { language } = useI18next()
-  const localeForStatsBoxNumbers = getLocaleForNumberFormat(language as Lang)
+const NetworkUpgradeSummary = ({ name }: NetworkUpgradeSummaryProps) => {
+  const [formattedUTC, setFormattedUTC] = useState("")
+  const { locale } = useRouter()
+  const localeForStatsBoxNumbers = getLocaleForNumberFormat(locale as Lang)
+  const { t } = useTranslation("page-history")
+
   const {
     dateTimeAsString,
     ethPriceInUSD,
@@ -30,25 +30,29 @@ const NetworkUpgradeSummary: React.FC<IProps> = ({ name }) => {
     epochNumber,
     slotNumber,
   } = NetworkUpgradeSummaryData[name]
-  const date = new Date(dateTimeAsString)
-  const formattedDate = date.toLocaleString(language, {
-    timeZone: "UTC",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-  })
-  const formattedUTC = `${formattedDate} +UTC`
+  // TODO fix dateTimeAsString
+
+  // calculate date format only on the client side to avoid hydration issues
+  useEffect(() => {
+    const date = new Date(dateTimeAsString as string)
+    const formattedDate = date.toLocaleString(locale, {
+      timeZone: "UTC",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    })
+    setFormattedUTC(`${formattedDate} +UTC`)
+  }, [dateTimeAsString, locale])
 
   const blockTypeTranslation = (translationKey, explorerUrl, number) => {
     return (
-      <Flex>
-        <Emoji fontSize="sm" mr={2} text=":bricks:" />
-        <Translation id={translationKey} />
-        :&nbsp;
-        <InlineLink to={`${explorerUrl}${number}`}>
+      <Flex className="whitespace-pre-wrap">
+        <Emoji className="me-2 text-sm" text=":bricks:" />
+        {t(translationKey)}:{" "}
+        <InlineLink href={`${explorerUrl}${number}`}>
           {new Intl.NumberFormat(localeForStatsBoxNumbers).format(number)}
         </InlineLink>
       </Flex>
@@ -57,35 +61,34 @@ const NetworkUpgradeSummary: React.FC<IProps> = ({ name }) => {
 
   return (
     <Stack>
-      {formattedUTC && (
+      {dateTimeAsString && (
         <Flex>
-          <Emoji fontSize="sm" mr={2} text=":calendar:" />
-          <Text fontFamily="monospace">{formattedUTC}</Text>
+          <Emoji className="me-2 text-sm" text=":calendar:" />
+          <p className="font-monospace">{formattedUTC}</p>
         </Flex>
       )}
       {blockNumber &&
         blockTypeTranslation(
-          "page-history-block-number",
+          "page-history:page-history-block-number",
           "https://etherscan.io/block/",
           blockNumber
         )}
       {epochNumber &&
         blockTypeTranslation(
-          "page-history-epoch-number",
+          "page-history:page-history-epoch-number",
           "https://beaconscan.com/epoch/",
           epochNumber
         )}
       {slotNumber &&
         blockTypeTranslation(
-          "page-history-slot-number",
+          "page-history:page-history-slot-number",
           "https://beaconscan.com/slot/",
           slotNumber
         )}
       {ethPriceInUSD && (
         <Flex>
-          <Emoji fontSize="sm" mr={2} text=":money_bag:" />
-          <Translation id="page-history-eth-price" />
-          :&nbsp;
+          <Emoji className="me-2 text-sm" text=":money_bag:" />
+          {t("page-history:page-history-eth-price")}:{" "}
           {new Intl.NumberFormat(localeForStatsBoxNumbers, {
             style: "currency",
             currency: "USD",
@@ -94,9 +97,9 @@ const NetworkUpgradeSummary: React.FC<IProps> = ({ name }) => {
       )}
       {waybackLink && (
         <Flex>
-          <Emoji fontSize="sm" mr={2} text=":desktop_computer:" />
-          <InlineLink to={waybackLink}>
-            <Translation id="page-history-ethereum-org-wayback" />
+          <Emoji className="me-2 text-sm" text=":desktop_computer:" />
+          <InlineLink href={waybackLink}>
+            {t("page-history:page-history-ethereum-org-wayback")}
           </InlineLink>
         </Flex>
       )}

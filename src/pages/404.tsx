@@ -1,41 +1,53 @@
-import React from "react"
-import { graphql, PageProps } from "gatsby"
-import { Box, Flex, Heading, Text } from "@chakra-ui/react"
+import type { GetStaticProps } from "next"
+import { serverSideTranslations } from "next-i18next/serverSideTranslations"
 
-import InlineLink from "../components/Link"
-import Translation from "../components/Translation"
+import { BasePageProps, Lang } from "@/lib/types"
 
-const NotFoundPage = (props: PageProps) => (
-  <Flex flexDir="column" align="center" w="full" mt={16} mb={0} mx="auto">
-    <Box py={4} px={8} w="full">
-      <Heading as="h1" size="2xl" my={8}>
+import InlineLink from "@/components/Link"
+import MainArticle from "@/components/MainArticle"
+import Translation from "@/components/Translation"
+
+import { existsNamespace } from "@/lib/utils/existsNamespace"
+import { getLastDeployDate } from "@/lib/utils/getLastDeployDate"
+import { getLocaleTimestamp } from "@/lib/utils/time"
+import { getRequiredNamespacesForPage } from "@/lib/utils/translations"
+
+export const getStaticProps = (async ({ locale }) => {
+  const requiredNamespaces = getRequiredNamespacesForPage("/")
+
+  // Want to check common namespace, so looking at requiredNamespaces[0]
+  const contentNotTranslated = !existsNamespace(locale!, requiredNamespaces[0])
+
+  const lastDeployDate = getLastDeployDate()
+  const lastDeployLocaleTimestamp = getLocaleTimestamp(
+    locale as Lang,
+    lastDeployDate
+  )
+
+  return {
+    props: {
+      ...(await serverSideTranslations(locale!, requiredNamespaces)),
+      contentNotTranslated,
+      lastDeployLocaleTimestamp,
+    },
+  }
+}) satisfies GetStaticProps<BasePageProps>
+
+const NotFoundPage = () => (
+  <div className="mx-auto mb-0 mt-16 flex w-full flex-col items-center">
+    <MainArticle className="my-8 w-full space-y-8 px-8 py-4">
+      <h1>
         <Translation id="we-couldnt-find-that-page" />
-      </Heading>
-      <Text mb={8}>
+      </h1>
+      <p>
         <Translation id="try-using-search" />{" "}
-        <InlineLink to="/">
+        <InlineLink href="/">
           <Translation id="return-home" />
         </InlineLink>
         .
-      </Text>
-    </Box>
-  </Flex>
+      </p>
+    </MainArticle>
+  </div>
 )
 
 export default NotFoundPage
-
-export const query = graphql`
-  query NotFoundPage($languagesToFetch: [String!]!) {
-    locales: allLocale(
-      filter: { language: { in: $languagesToFetch }, ns: { in: ["common"] } }
-    ) {
-      edges {
-        node {
-          ns
-          data
-          language
-        }
-      }
-    }
-  }
-`
